@@ -44,7 +44,11 @@
 "1rWChOE2cdHhAXHmC4mTIi", "The Weeknd", "Pop"
 "58LMgvXBPsJWrO2ffTKqzG", "Nessa Barrett", "Pop"
 "0ou4ZdkotCNzSgps3p3dtw", "Rina Sawayama", "Pop"
+"1S6O0b9UgNbh62XL1H5NFz", "Frank Sinatra", "Jazz"
 "0C8ZW7ezQVs4URX5aX7Kqx", "Selena Gomez", "Pop"
+"00EChQev3XXgUcELC6J9kT", "Dean Martin", "Pop"
+"0clQ9gcXSltwOXaTlqTNIK", "Abba", "Pop"
+"6o5GoxoQBe1HQKT8C4hJHK", "The Ronnettes", "Pop"
 "6pjvTjujQYyc9IzQEWllgY", "Girl in Red", "Pop"
 "3pBmyMqZTFPxjsumpnnzic", "Johnny Orlando", "Pop"
 "19W2jY1D7le5fOnQXgSYm3", "Demi Lovato", "Pop"
@@ -59,7 +63,9 @@
 "29bNU9OlMkJHrXuxzPbbpc", "Madonna", "Pop"
 "6ejvdvX20rWyyXpn6v8PkE", "Spice Girls", "Pop"
 "1cYOdLwkIEq4S9x3jEjTeT", "Cyndi Lauper", "Pop"
+"6ZmqDRJKJf3v3LzYZAaGGU", "The Beatles", "Pop"
 "2SF0xRUmWuN4qDNCsJo2gK", "Whitney Houston", "Pop"
+"0MpVyM9P1gxxepoBqWfp5n", "The Beach Boys", "Pop"
 "1AGucCwa0UM2rhn8Xsgi3S", "Backstreet Boys", "Pop"
 "1785cNZq0fRiJBgKqxYn7T", "Belinda Carlisle", "Pop"
 "61yYL8ajMeUQoCaM222sQL", "Michael Jackson", "Pop"
@@ -82,6 +88,7 @@
 "4tE58odqJlqJXUaZihb0xn", "Falling In Reverse", "Post-Hardcore"
 "6kMiWPbOSEzo0xtSvPgHnz", "Sleeping With Sirens", "Post-Hardcore"
 "3k6Aw2M6XRyQlThhjeNe52", "Pierce The Veil", "Post-Hardcore"
+"2WM00autOrghz3ZQ5JzAKR", "Ice Nine Kills", "Metalcore"
 "5kjfHECznxdPpzmzBJcdno", "My Chemical Romance", "Emo"
 "54OI5QItNrs9GCOztI9VIT", "All Time Low", "Pop Punk"
 "5qhNNZmxtQqbZz7s5NAGDp", "Avril Lavigne", "Pop Punk"
@@ -92,6 +99,8 @@
 "7sC4ScSBjybU9sD4KBUDMM", "Motionless In White", "Metalcore"
 "127crUFgJyS180jfiw8wJ0", "Foreigner", "Rock"
 "3q9EhLHGPWZThfyVhl3Twx", "AC/DC", "Rock"
+"4gEUNj0sdveR5y2gqQ0Sfr", "Elvis Presley", "Rock"
+"0j9otnSglen33Av2n8QbBs", "Bob Dylan", "Rock"
 "13bWe5T8g414UGlATbnZ3D", "Guns N' Roses", "Hard Rock"
 "1ZFYNpGUrjT7WA0gOBwdEF", "Queen", "Rock"
 "45bkf0klyHh7izIWEUz8r9", "Tom Petty", "Rock"
@@ -202,8 +211,7 @@
     "72HuVG7jqUCzE06dCfSosG", # infinite
     "0GK7Qzx0zzUsIMT7N96tLN", #sistar
     "4HBAjSJ6l7gbrshF2dYUwe", # blackpink
-]
-kpop_playlist_ids2 = [
+
     "4rw4CusPM6ltWRsyT7AP9Z", # wannaone
     "1opkOn6dhncgWGq4vavttb", # treasure
     "2zgf4J3pUuvaofCajZyRHU",# & team
@@ -240,7 +248,7 @@ kpop_playlist_ids2 = [
     "0YvM6TfYJ8CN3AmVpcLGOL", #ghost9
     "486bwuGP1bPcPgDcT50Oe7", #tiot
     "6lA534viPmqNj0j8RM788s", # ampers&one
-    "0da1Jd3sdkz4rQRrMJ2Gq0" # epex
+    "0da1Jd3sdkz4rQRrMJ2Gq0", # epex
     "5RqyrprYpVuN3foJZJjX3e", # waker
     "5BpDxgPzu8XdZMDMzg8qCI", # the wind
     "5Oq2Zt676qMFhq6kXlc6t5", # fantasy boys
