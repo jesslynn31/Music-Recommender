@@ -4,9 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Song Recommender</title>
+    <style>
+        
+     
+.auth-buttons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;  
+    gap: 10px;  
+}
+
+
+.register-btn, .login-btn {
+    padding: 10px 15px;
+    background-color:#c47b99;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+        .recommender-container {
+            width: 60%;
+            margin: 40px auto 20px auto;
+            padding: 20px;
+            background-color: #ffebf5; 
+            color: #333; 
+            text-align: center;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'Arial', sans-serif;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #c47b99;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form {
+            text-align: center;
+            margin: 30px auto;
+            width: 300px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+        }
+
+       
+        .feedback-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .feedback-btn:hover {
+            opacity: 0.7;
+        }
+    </style>
 </head>
 <body>
-    <h1>Song Recommender</h1>
+
+   
+    <button class="register-btn" onclick="window.location.href='{{ cognito_domain }}/signup'">
+        Register
+    </button>
+    
+    <button class="login-btn" onclick="window.location.href='{{ cognito_domain }}/login?client_id={{ client_id }}&response_type=code&scope=email+openid+profile&redirect_uri={{ redirect_uri }}'">
+        Login
+    </button>
+
+    <div class="recommender-container">
+        <h2>welcome to the song recommender!</h2>
+    </div>
+    
     <form action="/recommend" method="post">
         <label for="song_name">Enter a song:</label>
         <input type="text" id="song_name" name="song_name" required>

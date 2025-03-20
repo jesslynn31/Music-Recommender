@@ -1,7 +1,9 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, redirect, request, render_template, jsonify, url_for, session
+from authlib.integrations.flask_client import OAuth
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
+from dotenv import load_dotenv
 import os
 import sys
 import json
@@ -9,6 +11,24 @@ import matplotlib.pyplot as plt
 
 app = Flask(__name__, template_folder="templates")
 
+
+load_dotenv("info.env")
+
+app.config['SESSION_TYPE'] = 'filesystem'  
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True  
+app.config['SESSION_KEY_PREFIX'] = 'oauth_'
+
+app.secret_key = os.urandom(24)  
+oauth = OAuth(app)
+
+oidc = oauth.register(
+    name='oidc',
+    client_id=os.getenv("CLIENT_ID"),
+    client_secret=os.getenv("CLIENT_SECRET"),
+    server_metadata_url=os.getenv("COGNITO_AUTHORITY") + "/.well-known/openid-configuration",
+    client_kwargs={'scope': 'phone openid email'}
+)
 
 feedback_file = "user_feedback.json"
 if os.path.exists(feedback_file):
@@ -95,10 +115,35 @@ def get_similarities(song_name, data, threshold=0.5):
     return sorted(similar_songs, key=lambda x: x["similarity"], reverse=True)
 
 
-@app.route("/")
-def home():
-    print("Rendering index.html...")
-    return render_template("index.html")
+
+@app.route('/')
+def index():
+    return render_template(
+        "index.html",
+        cognito_domain=os.getenv("COGNITO_DOMAIN"),
+        client_id=os.getenv("CLIENT_ID"),
+        redirect_uri=os.getenv("REDIRECT_URI")
+    )
+    
+
+
+@app.route('/login')
+def login():
+    return oauth.oidc.authorize_redirect(redirect_uri='http://localhost:5000/callback')
+
+@app.route('/callback')
+def callback():
+    token = oauth.oidc.authorize_access_token()
+    user = token['userinfo']
+    session['user'] = user
+    return redirect(url_for('index'))
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('index'))
+
 
 @app.route("/recommend", methods=["POST"])
 def recommend():
