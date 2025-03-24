@@ -40,19 +40,17 @@ else:
 
 def load_data():
     try:
-        kpop_csv_path = "allkpopsongsfordataset.csv"
         allsongs_csv_path = "allsongsfordataset.csv"
 
-        kpop_songs = pd.read_csv(kpop_csv_path)
         all_songs = pd.read_csv(allsongs_csv_path)
 
-        print("Datasets loaded successfully.") 
-        return kpop_songs, all_songs
+        print("Dataset loaded successfully.") 
+        return all_songs
     except Exception as e:
         print("Error loading datasets:", e)
         return None, None
 
-kpop_songs, all_songs = load_data()
+all_songs = load_data()
 
 def save_feedback():
     with open(feedback_file, 'w') as f:
@@ -64,19 +62,28 @@ def get_csv_path(filename):
     else:
         return os.path.join(os.path.dirname(__file__), filename)
 
-def get_similarities(song_name, data, threshold=0.5):
+def get_similarities(song_name, data, selected_features=None, threshold=0.5):
     print(f"Searching for songs similar to: {song_name}")  
 
     numeric_features = ['Danceability', 'Energy', 'Tempo', 'Acousticness', 'Instrumentalness', 'Loudness', 'Key']
 
+    if selected_features is None:
+        selected_features = numeric_features
+    else:
+        selected_features = [feature for feature in selected_features if feature in numeric_features]
+    
+    if not selected_features:
+        print("No valid features selected!")
+        return []
+
    
-    data_cleaned = data.dropna(subset=['Track Name', 'Artist Name(s)'] + numeric_features)
-    data_cleaned[numeric_features] = data_cleaned[numeric_features].apply(pd.to_numeric, errors='coerce')
-    data_cleaned = data_cleaned.dropna(subset=numeric_features)
+    data_cleaned = data.dropna(subset=['Track Name', 'Artist Name(s)'] + selected_features)
+    data_cleaned[selected_features] = data_cleaned[selected_features].apply(pd.to_numeric, errors='coerce')
+    data_cleaned = data_cleaned.dropna(subset=selected_features)
 
  
     scaler = StandardScaler()
-    data_cleaned[numeric_features] = scaler.fit_transform(data_cleaned[numeric_features])
+    data_cleaned[selected_features] = scaler.fit_transform(data_cleaned[selected_features])
 
     
     matching_songs = data_cleaned[data_cleaned['Track Name'].str.lower() == song_name.lower()]
@@ -87,10 +94,11 @@ def get_similarities(song_name, data, threshold=0.5):
 
    
     knn = NearestNeighbors(n_neighbors=6, metric='euclidean')
-    knn.fit(data_cleaned[numeric_features]) 
+    knn.fit(data_cleaned[selected_features]) 
 
    
-    song_features = matching_songs[numeric_features].values.reshape(1, -1)  
+    song_features = matching_songs[selected_features].iloc[0].values.reshape(1, -1)
+
 
    
     distances, indices = knn.kneighbors(song_features)
@@ -144,16 +152,37 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
+@app.route('/get_suggestions', methods=['GET'])
+def get_suggestions():
+    song_name = request.args.get('song_name', '').lower().strip()
+    
+    mask = (
+        all_songs['Track Name']
+        .str.lower()
+        .fillna('')
+        .str.contains(song_name, regex=False, na=False)
+    )
+    
+  
+    matched_songs = all_songs[mask][['Track Name', 'Artist Name(s)']].drop_duplicates().head(10)
+    
+    suggestions = [
+        f"{row['Track Name']} by {row['Artist Name(s)']}" 
+        for _, row in matched_songs.iterrows()
+    ]
+    
+    return jsonify({'suggestions': suggestions})
 
 @app.route("/recommend", methods=["POST"])
 def recommend():
     song_name = request.form.get("song_name")
-    genre = request.form.get("genre")
+    selected_features = json.loads(request.form.get("selected_features", "[]"))
     
-    data = kpop_songs if genre == "kpop" else all_songs
-    similar_songs = get_similarities(song_name, data)
+    similar_songs = get_similarities(song_name, all_songs, selected_features)
     
-    return render_template("index.html", song_name=song_name, similar_songs=similar_songs)
+    return render_template("index.html", 
+                         song_name=song_name,
+                         similar_songs=similar_songs)
 
 @app.route("/feedback", methods=["POST"])
 def feedback():
