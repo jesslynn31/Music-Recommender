@@ -1,50 +1,66 @@
-import spotipy
+import requests
+import os
+from dotenv import load_dotenv
 import csv
-import time
-from spotipy.oauth2 import SpotifyOAuth
 
 
-SPOTIPY_CLIENT_ID = 'insert client ID'
-SPOTIPY_CLIENT_SECRET = 'insert your spotify client secret'
-SPOTIPY_REDIRECT_URI = 'insert your redirect url here'
+load_dotenv(dotenv_path="spotifyac.env")
 
-scope = "user-library-read playlist-modify-private playlist-modify-public"
+ACCESS_TOKEN = os.getenv("SPOTIFY_ACCESS_TOKEN")
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id=SPOTIPY_CLIENT_ID,
-    client_secret=SPOTIPY_CLIENT_SECRET,
-    redirect_uri=SPOTIPY_REDIRECT_URI,
-    scope=scope
-))
+HEADERS = {
+    "Authorization": f"Bearer {ACCESS_TOKEN}",
+    "Content-Type": "application/json"
+}
 
-
-
-def playlist_initializer(playlist_id):
+def get_playlist_tracks(playlist_id):
     tracks = set()
-    try:
-        results = sp.playlist_tracks(playlist_id)
-        for item in results['items']:
+    url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
+
+    while url:
+        res = requests.get(url, headers=HEADERS)
+        if res.status_code != 200:
+            print(f"Failed to fetch playlist {playlist_id}: {res.json()}")
+            break
+
+        data = res.json()
+        for item in data["items"]:
             if item['track'] and item['track']['id']:
                 track_id = item['track']['id']
                 track_name = item['track']['name']
-                print(f"Fetching: {track_name}")  
+                print(f"Fetching: {track_name}")
                 tracks.add(track_id)
 
-        while results['next']:
-            results = sp.next(results)
-            for item in results['items']:
-                if item['track'] and item['track']['id']:
-                    track_id = item['track']['id']
-                    track_name = item['track']['name']
-                    print(f"Fetching: {track_name}")  
-                    tracks.add(track_id)
-
-    except spotipy.exceptions.SpotifyException as e:
-        print(f"Error fetching playlist {playlist_id}: {e}")
-    except Exception as e:
-        print(f"Unexpected error for playlist {playlist_id}: {e}")
+        url = data.get('next')
 
     return list(tracks)
+
+
+def get_current_user_id():
+    url = "https://api.spotify.com/v1/me"
+    res = requests.get(url, headers=HEADERS)
+    return res.json()["id"]
+
+
+def create_playlist(user_id, name, description):
+    url = f"https://api.spotify.com/v1/users/{user_id}/playlists"
+    payload = {
+        "name": name,
+        "description": description,
+        "public": False
+    }
+    res = requests.post(url, json=payload, headers=HEADERS)
+    return res.json()
+
+
+def add_tracks_to_playlist(playlist_id, track_ids):
+    url = f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
+    uris = [f"spotify:track:{tid}" for tid in track_ids]
+    payload = {
+        "uris": uris
+    }
+    res = requests.post(url, json=payload, headers=HEADERS)
+    return res.json()
 
 
 def create_playlist_and_add_songs():
@@ -56,56 +72,32 @@ def create_playlist_and_add_songs():
             next(reader)  
 
             for row in reader:
-                playlist_id = row[0] 
-
-                
-                tracks = playlist_initializer(playlist_id)  
-                
-                all_tracks.extend(tracks)  
-
-               
+                playlist_id = row[0]
+                tracks = get_playlist_tracks(playlist_id)
+                all_tracks.extend(tracks)
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Error reading CSV: {e}")
+        return
 
-    
-    username = sp.current_user()['id']  
+    user_id = get_current_user_id()
+    print(f"Your Spotify user ID: {user_id}")
 
-    tracks_added = 0
-    new_playlist = None
+    unique_tracks = list(set(all_tracks))
+    chunks = [unique_tracks[i:i+100] for i in range(0, len(unique_tracks), 100)]
+    playlist_count = 1
+    created_playlist = None
 
-    
-    for i in range(0, len(all_tracks), 100):
-        batch = all_tracks[i:i + 100]
+    for i, chunk in enumerate(chunks):
+        if i % 100 == 0:
+            playlist_name = f"all_songs_for_dataset_{playlist_count}"
+            created_playlist = create_playlist(user_id, playlist_name, "songs for dataset")
+            playlist_count += 1
 
-        
-        if tracks_added == 0 and new_playlist is None:
-            new_playlist = sp.user_playlist_create(
-                user=username,
-                name='all_songs_for_dataset', 
-                public=False, 
-                description='songs for dataset'
-            )
+        add_tracks_to_playlist(created_playlist['id'], chunk)
 
-       
-        sp.playlist_add_items(new_playlist['id'], batch)  
-        tracks_added += len(batch)
+    print("All songs added!")
 
-        if tracks_added >= 10000:
-            new_playlist = sp.user_playlist_create(
-                user=username,
-                name=f'all_songs_for_dataset_{tracks_added // 10000 + 1}',
-                public=False,
-                description='songs for dataset'
-            )
-            tracks_added = 0  
-
-    #
-    if tracks_added > 0 and new_playlist is not None:
-        sp.playlist_add_items(new_playlist['id'], all_tracks[-tracks_added:])
-        
 
 if __name__ == "__main__":
-    
     create_playlist_and_add_songs()
-  
