@@ -1,21 +1,22 @@
 
 The current state of the project? 
-![image](https://github.com/user-attachments/assets/4b75050f-4433-48e4-a118-5b9a759bac9e)
+![image](https://github.com/user-attachments/assets/11431922-a3cd-425c-a5b5-547adb7e282a)
 
 
 
-You would type in a song name and it'll autofill as you type if it's in the dataset. 
+
+You would type in a song name and it'll come up with suggestions from the dataset. 
 You would pick different attributes or "features". The website will give you songs based off those attributes which are similar.
-When choosing attributes, it'll light up.
-(color scheme to be fixed the future) 
+The attributes change color when selected to a darker pink. 
 
-![image](https://github.com/user-attachments/assets/19e55b26-6b29-456b-b393-b78711d54a04)
 
-Then the songs similar will pop up below: 
-(formatting to be fixed in the future) 
+![image](https://github.com/user-attachments/assets/d6463309-b038-40d7-b1c1-69532608a089)
+![image](https://github.com/user-attachments/assets/4265e51a-d51a-4bd1-b710-ebca847e7c38)
 
-![image](https://github.com/user-attachments/assets/a86d5544-f56c-408a-b4d5-0356dd5fe2fd)
 
+The similar songs pop up in the recommended song box below: 
+
+![image](https://github.com/user-attachments/assets/4b7f53cc-221d-4047-ac33-82082b7c7ccd)
 
 
 
