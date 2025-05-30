@@ -13,7 +13,7 @@
 <body>
 
   <div class="recommender-container">
-    <h2>welcome to the song recommender!</h2>
+    <h2>HarmoniFind</h2>
   </div>
 
   <form action="/recommend" method="post">
@@ -42,17 +42,13 @@
       <button type="submit">Find Similar Songs</button>
     </div>
 
-    <div class="auth-buttons">
-      <button class="button" type="button" onclick="window.location.href='{{ cognito_domain }}/signup'">
-        Register
-      </button>
 
-      <button class="button" type="button" onclick="window.location.href='{{ cognito_domain }}/login?client_id={{ client_id }}&response_type=code&scope=email+openid+profile&redirect_uri={{ redirect_uri }}'">
-        Login
-      </button>
-    </div>
   </form>
 
+  <div class="auth-buttons">
+    <a class="button" href="/register">Register</a>
+    <a class="button" href="/login">Login</a>
+  </div>
   {% if similar_songs %}
   <div class="results-container">
     <h2>Similar Songs to "{{ song_name }}"</h2>

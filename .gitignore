@@ -8,3 +8,4 @@ info.env
 bfg-1.15.0.jar
 git_filter_repo.py
 spotifyac.env
+database.env

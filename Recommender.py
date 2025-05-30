@@ -7,28 +7,25 @@ from dotenv import load_dotenv
 import os
 import sys
 import json
+from werkzeug.security import generate_password_hash, check_password_hash
 import matplotlib.pyplot as plt
+import psycopg2
+import secrets
 
 app = Flask(__name__, template_folder="templates")
 
 
-load_dotenv("info.env")
+app.secret_key = secrets.token_hex(16)
 
-app.config['SESSION_TYPE'] = 'filesystem'  
-app.config['SESSION_PERMANENT'] = False
-app.config['SESSION_USE_SIGNER'] = True  
-app.config['SESSION_KEY_PREFIX'] = 'oauth_'
+load_dotenv("database.env")
 
-app.secret_key = os.urandom(24)  
-oauth = OAuth(app)
+conn = psycopg2.connect(database=os.getenv("db_name"),
+                        host=os.getenv("db_host"),
+                        user=os.getenv("db_user"),
+                        password=os.getenv("db_pass"),
+                        port=int(os.getenv("db_port")))
 
-oidc = oauth.register(
-    name='oidc',
-    client_id=os.getenv("CLIENT_ID"),
-    client_secret=os.getenv("CLIENT_SECRET"),
-    server_metadata_url=os.getenv("COGNITO_AUTHORITY") + "/.well-known/openid-configuration",
-    client_kwargs={'scope': 'phone openid email'}
-)
+
 
 feedback_file = "user_feedback.json"
 if os.path.exists(feedback_file):
@@ -134,18 +131,51 @@ def index():
     )
     
 
-
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return oauth.oidc.authorize_redirect(redirect_uri='http://localhost:5000/callback')
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
 
-@app.route('/callback')
-def callback():
-    token = oauth.oidc.authorize_access_token()
-    user = token['userinfo']
-    session['user'] = user
-    return redirect(url_for('index'))
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username, password FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
 
+        if user and check_password_hash(user[2], password):
+            
+            session['user_id'] = user[0]
+            session['username'] = user[1]
+            return redirect(url_for('index'))  
+        else:
+            return "Invalid credentials"
+
+    return render_template('register.html')
+
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        email = request.form['email']
+        username = request.form['username']
+        password = request.form['password']
+        password = request.form['password']
+
+        hashed_password = generate_password_hash(password)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute(
+                "INSERT INTO users (username, password, email) VALUES (%s, %s, %s)",
+                (username, hashed_password, email)
+            )
+            conn.commit()
+            return "User registered successfully!"
+        except Exception as e:
+            conn.rollback()
+            return f"Error: {e}"
+
+    return render_template('register.html')
 
 @app.route('/logout')
 def logout():
